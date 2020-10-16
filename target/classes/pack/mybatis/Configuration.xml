@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+ <typeAliases>
+ 	<typeAlias type="pack.model.CardDto" alias="cDto"/>
+ 	<typeAlias type="pack.model.BoardDto" alias="bDto"/>
+ 	<typeAlias type="pack.model.RegisterDto" alias="rDto"/>
+ 	<typeAlias type="pack.controller.BoardBean" alias="boardBean"/>
+ 	<typeAlias type="pack.controller.CardBean" alias="cardBean"/>
+ 	<typeAlias type="pack.model.LoanDto" alias="lDto"/>
+ </typeAliases>
+
+ <mappers>
+  <mapper resource="pack/mybatis/DataMapper.xml" />
+ </mappers>
+</configuration>

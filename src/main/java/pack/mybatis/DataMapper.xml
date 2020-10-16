@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev">
+
+	<!-- 모든 카드 리스트 -->
+	<select id="dispCardData" resultType="cDto">
+		select * from card order by count desc, cardname asc
+	</select>
+	<!-- 카드 이름으로 카드 찾기 -->
+	<select id="searchCardName" resultType="cDto"
+		parameterType="String">
+		select * from card where cardname like concat('%', #{cardname}, '%')
+	</select>
+	<!-- 카드사 이름으로 카드 찾기 -->
+	<select id="searchCardCom" resultType="cDto"
+		parameterType="String">
+		select * from card where companyname like concat('%',#{companyname}, '%')
+	</select>
+
+	<!-- (관리자)카드 넘버로 카드 정보 불러오기 -->
+	<select id="cardModify" parameterType="String" resultType="cDto">
+		select * from card where cardno=#{no}
+	</select>
+
+	<!-- (관리자)카드 넘버로 카드 혜택 불러오기 -->
+	<select id="beneModify" parameterType="String" resultType="cDto">
+		select * from cardbenefit where cardno=#{no}
+	</select>
+
+	<!-- 카드 정보 수정 -->
+	<update id="updateCard" parameterType="cDto">
+		update card set cardname=#{cardname}, companyname=#{companyname}, image=#{image} where cardno=#{cardno}
+	</update>
+
+	<!-- 카드 추가 -->
+	<insert id="insCard" parameterType="cDto">
+		insert into card(companyname, cardname, image, count, partcard) values(#{companyname}, #{cardname}, #{image}, 0,#{partcard})
+	</insert>
+
+	<!-- 카드 삭제 -->
+	<delete id="delCard" parameterType="String">
+		delete from card where cardno=#{cardno}
+	</delete>
+
+	<!-- 혜택 삭제 -->
+	<delete id="delBene" parameterType="String">
+		delete from cardbenefit where cardno=#{cardno}
+	</delete>
+
+	<!-- 전체 카드 수 세기 -->
+	<select id="totalCardSu" resultType="int">
+	select count(cardno) cardSu from card
+	</select>
+	
+	 <!-- 아이디 중복 체크 -->
+ <select id="idChkBoard" resultType="int">
+	SELECT COUNT(*) FROM cardguest WHERE id = #{id}
+</select>
+ <!-- 관리자 로그인 체크  -->
+ <select id="logcheckadmin"  parameterType="boardBean" resultType="string">
+    select * from cardadmin where id=#{id} and pwd=#{pwd}
+ </select>
+ 
+ <!-- benefit 삽입 -->
+ <select id="beneinserting" parameterType="string" resultType="cDto">
+ select a.cardno cardno, a.cardname cardname, count(benefit) bcount, a.companyname companyname, a.image image, a.partcard partcard from card a, cardbenefit b where a.cardno = b.cardno and  ${sql}  group by a.cardno order by count(benefit) desc, a.cardno asc
+ </select>
+ 
+ <!-- benefit 수정 -->
+ <insert id="benefitupdate" parameterType="String">
+ insert into cardbenefit(cardno, benefit) values ((select max(cardno) from card),#{sql})
+ </insert>
+ <!-- 내가 쓴 글 가져오기 -->
+ <select id="getGuestBoard" parameterType="string"	resultType="bDto">
+	SELECT * FROM shopboard where gnum in (select gnum from shopboard where id = #{id})
+ </select>
+ <!-- 카드이미지 없을 경우 수정 -->
+ <update id="updateCardNoImage" parameterType="cDto">
+		update card set cardname=#{cardname}, companyname=#{companyname} where cardno=#{cardno}
+	</update>
+	<!-- 회원가입 -->
+ <insert id="insertGuest" parameterType="cardBean">
+ insert into cardguest(id,pwd,irum,jumin,email,phonenum) values(#{id},#{pwd},#{irum},#{jumin},#{email},#{phonenum})
+ </insert>
+ <!-- 아이디 중복체크 -->
+ <select id ="idCheck" parameterType="String" resultType="string">
+ select id from cardguest where id=#{id}
+ </select>
+ 
+ <!-- 혜택 수정용 -->
+ <insert id="insUpBene" parameterType="cDto" >
+ insert into cardbenefit(cardno, benefit) values(#{cardno}, #{benefit})
+ </insert>
+ 
+ <!-- 대출 전체 출력(관리자) -->
+ <select id="selectAllLoanAdmin" resultType="lDto">
+ select * from loan order by loanno asc
+ </select>
+ 
+ <!-- 전체 대출 수 -->
+ <select id="totalLoanSu" resultType="int">
+ select count(*) from loan;
+ </select>
+ 
+ <!-- 대출 추가 -->
+ <insert id="insertLoan" parameterType="lDto">
+ insert into loan(loancompany, loanname, min, max, period, url) values(#{loancompany}, #{loanname}, #{min}, #{max}, #{period}, #{url})
+ </insert>
+ 
+ <!-- 대출 수정 -->
+ <update id="updateLoan" parameterType ="lDto">
+ update loan set loanname=#{loanname}, loancompany=#{loancompany}, min=#{min}, max=#{max} where loanno=#{loanno}
+ </update>
+ 
+ <!-- 대출 삭제 -->
+ <delete id="deleteLoan" parameterType="String">
+ delete from loan where loanno = #{loanno}
+ </delete>
+ 
+<!-- 대출 검색(관리자-회사명) -->
+ <select id="searchLoanCompany" resultType="lDto" parameterType="String">
+    select loanno, loanname, loancompany, min, max, (min+max)/2 avg, period, url from loan
+    where loancompany like concat('%', #{word}, '%')
+    order by avg asc
+ </select>
+ 
+ <!-- 대출 검색(관리자-대출명) -->
+ <select id="searchLoanName" resultType="lDto" parameterType="String">
+    select loanno, loanname, loancompany, min, max, (min+max)/2 avg, period, url from loan
+    where loanname like concat('%', #{word}, '%')
+    order by avg asc
+ </select>
+ 
+  <!-- 대출 정보 하나만 검색 -->
+ <select id="selectOneLoan" parameterType="String" resultType="lDto">
+ select * from loan where loanno = #{loanno}
+ </select>
+	
+	
+	
+	
+	<!-- ********
+	*****상욱*****
+	*******
+	**** -->
+	<select id="logcheck" parameterType="boardBean"
+		resultType="string">
+		select * from cardadmin where id=#{id} and pwd=#{pwd}
+	</select>
+
+
+	<select id="searchCardPart" parameterType="string"
+		resultType="cDto">
+		select * from card where partcard like concat('%',#{searchValue},'%') order by count desc
+	</select>
+
+	<select id="getCardDetail" parameterType="string"
+		resultType="cDto">
+		select * FROM card a INNER JOIN cardbenefit b ON a.cardno=b.cardno WHERE a.cardno=#{num}
+	</select>
+
+	<select id="getGuestLogin" parameterType="cardBean"
+		resultType="string">
+		select * from cardguest where id=#{id} and pwd=#{pwd}
+	</select>
+
+	<select id="getGuestInfo" parameterType="string" resultType="cDto">
+		select * from cardguest where id=#{id}
+	</select>
+
+	<update id="getCardView" parameterType="string"	>
+		update card set count=count + 1 where cardno=#{num}
+	</update>
+
+	<update id="guestUpdate" parameterType="cardBean">
+		update cardguest set irum=#{irum}, jumin=#{jumin}, email=#{email}, phonenum=#{phonenum} where id=#{id}
+	</update>
+
+	<select id="getGuestCard" parameterType="string"
+		resultType="cDto">
+		SELECT * FROM cardguest a INNER JOIN registercard b ON a.id=b.id INNER JOIN card c ON b.cardno=c.cardno WHERE a.id = #{id}
+	</select>
+
+	<!-- ************혜민********
+	**************
+	****************************
+	******** -->
+
+	 <select id="selectGuestData" resultType="cDto">
+      select id, pwd, irum,
+      jumin, email, phonenum, creditscore
+      from cardguest
+   </select>
+
+   <select id="selectNameGuestData" resultType="cDto"
+      parameterType="String">
+      select id, pwd, irum, jumin, email, phonenum,
+      creditscore
+      from cardguest
+      where irum like concat('%', #{word}, '%')
+   </select>
+
+   <select id="selectIdGuestData" resultType="cDto"
+      parameterType="String">
+      select id, pwd, irum, jumin, email, phonenum,
+      creditscore
+      from cardguest
+      where id like concat('%', #{word}, '%')
+   </select>
+
+   <select id="selectGuestDataInfo" resultType="cDto"
+      parameterType="String">
+      select id, pwd, irum, jumin, email, phonenum,
+      creditscore
+      from cardguest
+      where id=#{id}
+   </select>
+
+   <select id="selectSearchGuestData" resultType="cDto"
+      parameterType="String">
+      select id, pwd, irum, jumin, email, phonenum,
+      creditscore
+      from cardguest
+   </select>
+
+   <select id="selectGuestCardData" resultType="rDto"
+      parameterType="String">
+      select registerno, cardname, registerdate, cardstatus,
+      registercard.cardno
+      from registercard left outer join card on
+      registercard.cardno=card.cardno
+      where id=#{id}
+   </select>
+
+   <select id="selectGuestCard" resultType="rDto"
+      parameterType="String">
+      select registerno, cardname, registerdate, cardstatus,
+      registercard.cardno
+      from registercard left outer join card on
+      registercard.cardno=card.cardno
+      where registerno=#{registerno}
+   </select>
+
+   <!-- maxnum -->
+   <select id="currentNum" resultType="integer">
+      select count(id) from cardguest
+   </select>
+
+   <select id="totalCnt" resultType="integer">
+      select count(*) from cardguest
+   </select>
+
+   <select id="totalCntC" resultType="integer">
+      select count(*) from card
+   </select>
+   
+   <!-- 관리자 -->
+
+   <update id="updateGuestDataAdmin" parameterType="cDto">
+      update cardguest set pwd=#{pwd}, irum=#{irum}, jumin=#{jumin}, email=#{email}, phonenum=#{phonenum}, creditscore=#{creditscore} where id=#{id}
+   </update>
+   
+   <update id="updateGuestCardData" parameterType="rDto">
+      update registercard set cardstatus=#{cardstatus} where registerno=#{registerno}
+   </update>
+
+   <delete id="deleteGuestData" parameterType="String">
+      delete from cardguest where id=#{id}
+   </delete>
+   
+   <delete id="deleteGuestCardData" parameterType="String">
+      delete from registercard where id=#{id}
+   </delete>
+   
+   <!-- 관리자 -->
+   <!-- 카테고리별 검색 및 count -->
+
+   <select id="selectBenefit" resultType="cDto" parameterType="String">
+      select card.cardno, companyname, cardname, count, image, partcard, count(card.cardno) count from card right outer join cardbenefit on 
+      card.cardno=cardbenefit.cardno where benefit regexp (case #{category} 
+      when 'cafe' then '카페' 
+      when 'traffic' then '교통|주유' 
+      when 'culture' then '영화|놀이공원|서점|도서' 
+      when 'meal' then '푸드' 
+      when 'store' then '편의점' 
+      when 'health' then '약' 
+      when 'shopping' then '쇼핑' 
+      when 'communication' then '통신' end) group by cardname order by count desc
+   </select>
+   
+   <select id="benefitCount" parameterType="String" resultType="int">
+      select count(card.cardno) count
+      from card right outer join cardbenefit on
+      card.cardno=cardbenefit.cardno
+      where
+      benefit regexp (case #{category}
+         when 'cafe' then '카페'
+         when 'traffic' then '교통|주유'
+         when 'culture' then '영화|놀이공원|서점|도서'
+         when 'meal' then '푸드'
+         when 'store' then '편의점'
+         when 'health' then '약'
+         when 'shopping' then '쇼핑'
+         when 'communication' then '통신'
+      end
+      )
+   </select>
+   
+    <!--  대출리스트 -->
+  <select id="selectLoanList" resultType="lDto">
+ 	select loanno, loanname, loancompany, min, max, (min+max)/2 avg, period, url from loan order by avg asc;
+ </select>
+ <!-- 대출 선택 -->
+ <select id="chooseLoan" parameterType="lDto" resultType="lDto">
+ select * from loan where <![CDATA[max < #{max}]]> and period like concat('%', #{period}, '%') order by min asc 
+ </select>
+   <!-- 카테고리별 검색 및 count -->
+	
+<!-- 
+*************8영재 + 국정
+********************
+*************
+ -->
+ 
+ <select id="selectListBoard" resultType="bDto">
+  	select * from shopboard order by gnum desc, onum asc
+ </select>
+ 
+ <select id="searchListBoard" parameterType="boardBean" resultType="bDto">
+  	select * from shopboard 
+  	where ${searchName} like concat('%',#{searchValue},'%') order by gnum desc, onum asc
+ </select>
+ 
+ <select id="selectOneBoard" parameterType="string" resultType="bDto">
+  	select * from shopboard where num=#{num}
+ </select>
+ 
+ <insert id="insertDataBoard" parameterType="boardBean">
+ 	insert into shopboard values(#{id},#{num},#{name},#{pwd},#{mail},#{title},#{cont},#{bip},#{bdate},0,#{gnum},0,0)
+ </insert>
+ 
+ <update id="updateDataBoard" parameterType="boardBean">
+ 	update shopboard set name=#{name},mail=#{mail},title=#{title},cont=#{cont} where num=#{num}
+ </update>
+ 
+ <delete id="deleteDataBoard" parameterType="string">
+ 	delete from shopboard where num=#{num}
+ </delete>
+ 
+ <!--  maxnum -->
+ <select id="currentNumBoard" resultType="integer">
+ 	select max(num) from shopboard
+ </select>
+ 
+ <select id="totalCntBoard" resultType="integer">
+ 	select count(*) from shopboard
+ </select>
+ 
+ <!-- readcnt -->
+ <update id="updateReadcntBoard" parameterType="string">
+ 	update shopboard set readcnt=readcnt + 1 where num=#{num}
+ </update>
+ 
+ <!-- password -->
+ <select id="selectPassBoard" parameterType="string" resultType="string">
+ 	select pass from shopboard where num=#{num}
+ </select>
+
+ <!-- reply -->
+ <update id="updateOnumBoard" parameterType="boardBean">
+ 	update shopboard set onum=onum + 1 where onum >= #{onum} and gnum=#{gnum}
+ </update>
+
+ <insert id="insertReDataAdmin" parameterType="boardBean">
+ 	insert into shopboard values(#{id}, #{num},#{name},#{pwd},#{mail},#{title},#{cont}, #{bip},#{bdate},0,#{gnum},#{onum},#{nested})
+ </insert>
+ 
+ <insert id="insertBoard" parameterType="cardBean">
+ insert into cardguest(id,pwd,irum,jumin,email,phonenum) values(#{id},#{pwd},#{irum},#{jumin},#{email},#{phonenum})
+ </insert>
+ 
+
+
+</mapper>
